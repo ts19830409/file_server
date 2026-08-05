@@ -1,3 +1,8 @@
 from django.db import models
 
-# Create your models here.
+class File(models.Model):
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE,
+                             related_name='files',
+                             verbose_name='Пользователь')
+    
+
