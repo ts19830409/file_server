@@ -15,20 +15,57 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='UploadStats',
+            name="UploadStats",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file_name', models.CharField(max_length=255, verbose_name='Имя файла')),
-                ('file_size', models.BigIntegerField(verbose_name='Размер файла в байтах')),
-                ('status', models.CharField(choices=[('success', 'Успешно'), ('failed', 'Ошибка')], max_length=10, verbose_name='Статус загрузки')),
-                ('error_message', models.TextField(blank=True, verbose_name='Сообщение об ошибке')),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата загрузки')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='upload_stats', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "file_name",
+                    models.CharField(max_length=255, verbose_name="Имя файла"),
+                ),
+                (
+                    "file_size",
+                    models.BigIntegerField(verbose_name="Размер файла в байтах"),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("success", "Успешно"), ("failed", "Ошибка")],
+                        max_length=10,
+                        verbose_name="Статус загрузки",
+                    ),
+                ),
+                (
+                    "error_message",
+                    models.TextField(blank=True, verbose_name="Сообщение об ошибке"),
+                ),
+                (
+                    "uploaded_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата загрузки"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="upload_stats",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Пользователь",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Статистика загрузки',
-                'verbose_name_plural': 'Статистика загрузок',
-                'ordering': ['-uploaded_at'],
+                "verbose_name": "Статистика загрузки",
+                "verbose_name_plural": "Статистика загрузок",
+                "ordering": ["-uploaded_at"],
             },
         ),
     ]

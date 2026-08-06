@@ -8,15 +8,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0001_initial'),
+        ("users", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelManagers(
-            name='user',
+            name="user",
             managers=[
-                ('objectы', django.db.models.manager.Manager()),
-                ('objects', django.contrib.auth.models.UserManager()),
+                ("objectы", django.db.models.manager.Manager()),
+                ("objects", django.contrib.auth.models.UserManager()),
             ],
         ),
     ]
