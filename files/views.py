@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-
+from files.permissions import IsOwner
 from files.models import File
 from files.serializers import FileSerializer
 
@@ -17,3 +17,12 @@ class FileViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff:
             return File.objects.all()
         return File.objects.filter(user=self.request.user)
+
+    def get_permissions(self):
+        if self.action in ['update', 'partial_update', 'destroy']:
+            self.permission_classes = [IsAuthenticated, IsOwner]
+        elif self.action == 'list':
+            self.permission_classes = [IsAuthenticated]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return [permission() for permission in self.permission_classes]
