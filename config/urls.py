@@ -4,10 +4,8 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework.permissions import AllowAny
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)  # noqa: E501
+from rest_framework_simplejwt.views import (TokenObtainPairView,  # noqa: E501
+                                            TokenRefreshView)
 
 from files.views import FileViewSet
 from stats.views import StatsListView

@@ -33,6 +33,8 @@ class FileSerializer(serializers.ModelSerializer):
 
     def get_file_url(self, obj):
         request = self.context.get("request")
-        if request and obj.file:
-            return request.build_absolute_url(obj.file.url)
+        if obj.file:
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
         return None

@@ -28,20 +28,12 @@ class User(AbstractUser):
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="Дата регистрации"
     )
-    files_count = models.IntegerField(
-        default=0, verbose_name="Общее количество файлов"
-    )  # noqa: E501
-    total_size = models.BigIntegerField(
-        default=0, verbose_name="Загружено байтов"
-    )  # noqa: E501
-    success_uploads = models.IntegerField(
-        default=0, verbose_name="Успешных загрузок"
-    )  # noqa: E501
-    failed_uploads = models.IntegerField(
-        default=0, verbose_name="Неудачных загрузок"
-    )  # noqa: E501
+    files_count = models.IntegerField(default=0, verbose_name="Общее количество файлов")
+    total_size = models.BigIntegerField(default=0, verbose_name="Загружено байтов")
+    success_uploads = models.IntegerField(default=0, verbose_name="Успешных загрузок")
+    failed_uploads = models.IntegerField(default=0, verbose_name="Неудачных загрузок")
 
-    objectы = UserManager()
+    objects = UserManager()
 
     USERNAME_FIELD = "login"
     REQUIRED_FIELDS = ["email"]
