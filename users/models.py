@@ -1,5 +1,21 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+
+
+class UserManager(BaseUserManager):
+    def create_user(self, login, email, password=None, **extra_fields):
+        if not login:
+            raise ValueError('Логин обязателен')
+        email = self.normalize_email(email)
+        user = self.model(login=login, email=email, **extra_fields)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_superuser(self, login, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(login, email, password, **extra_fields)
 
 
 class User(AbstractUser):
@@ -13,6 +29,7 @@ class User(AbstractUser):
     success_uploads = models.IntegerField(default=0, verbose_name='Успешных загрузок')
     failed_uploads = models.IntegerField(default=0, verbose_name='Неудачных загрузок')
     
+    objectы = UserManager()
 
     USERNAME_FIELD = 'login'
     REQUIRED_FIELDS = ['email']

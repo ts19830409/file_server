@@ -1,3 +1,8 @@
 from django.contrib import admin
+from files.models import File
 
-# Register your models here.
+@admin.register(File)
+class FileAdmin(admin.ModelAdmin):
+    list_display = ['name_file', 'user', 'size_file', 'is_public', 'uploaded_at']
+    search_fields = ['name_file', 'user__login']
+
