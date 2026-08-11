@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-3">Мои файлы</h2>
+
+<div id="message" class="mt-2"></div>
+
+<div class="mb-4">
+    <form id="upload-form">
+        <div class="row">
+            <div class="col-md-2">
+                <label class="btn btn-primary w-100" for="file" id="file-label">Выберите файл</label> 
+                <input type="file" class="form-control d-none" id="file" required>
+                
+            </div>
+            <div class="col-md-4">
+                <input type="text" class="form-control" id="description" placeholder="Описание">
+            </div>
+            <div class="col-md-1">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="is_public">
+                    <label class="form-check-label" for="is_public">Публичный</label>
+                </div>
+            </div>
+            <div class="col-md-2 text-end">
+                <button type="submit" class="btn btn-primary">Загрузить</button>
+
+            </div>
+        </div>
+        <div class="progress mt-2 d-none" id="progress-container">
+            <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0%">0%</div>
+        </div>
+    </form>
+</div>
+
+<div style="max-height: 500px; overflow-y: auto;">
+    <table class="table table-hover table-bordered">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Размер</th>
+                <th>Описание</th>
+                <th>Публичный</th>
+                <th>Скачиваний</th>
+                <th>Дата</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="files-list"></tbody>
+    </table>
+</div>
+<div id="total-files" class="mt-4 text-muted"></div>
+
+<script>
+const token = localStorage.getItem('access');
+if (!token) window.location.href = '/login/';
+
+async function loadFiles() {
+    
+    let user = null;
+    
+    try {
+        const userRes = await fetch('/api/auth/user/', {
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+        user = await userRes.json();
+        if (user.avatar) {
+            document.getElementById('header-avatar').src = user.avatar;
+        }
+    } catch(e) {}
+
+    if (user) {    
+        const greetingText = document.getElementById('greeting-text');
+        if (greetingText) {
+            const hour = new Date().getHours();
+            let greeting = 'Доброй ночи';
+            if (hour >= 6 && hour < 12) greeting = 'Доброе утро';
+            else if (hour >= 12 && hour < 18) greeting = 'Добрый день';
+            else if (hour >= 18 && hour < 23) greeting = 'Добрый вечер';
+    
+            const name = user.first_name || user.login;
+            greetingText.textContent = `${greeting}, ${name}!`;
+        }
+    }
+
+    
+
+
+    const res = await fetch('/api/files/', {
+        headers: {'Authorization': `Bearer ${token}`}
+    });
+    const data = await res.json();
+    const tbody = document.getElementById('files-list');
+    const files = Array.isArray(data) ? data : data.results;
+    tbody.innerHTML = files.map(f => `
+        <tr>
+            <td>${f.name_file}</td>
+            <td>${f.format_size || '—'}</td>
+            <td>${f.description || ''}</td>
+            <td>${f.is_public ? 'Да' : 'Нет'}</td>
+            <td>${f.download_count}</td>
+            <td>${new Date(f.uploaded_at).toLocaleDateString('ru-RU')}</td>
+            <td>
+                <a href="#" onclick="downloadFile(${f.id})" class="btn btn-sm btn-outline-primary">Скачать</a>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(${f.id})">Удалить</button>
+                ${f.is_public ? `<button class="btn btn-sm btn-outline-success" onclick="copyLink('${f.share_link}')">Ссылка</button>` : ''}
+            </td>
+        </tr>
+    `).join('');
+        
+    let totalSize = 0;
+    files.forEach(f => totalSize += f.size_file || 0);
+    const formatSize = (bytes) => {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' Kb';
+        if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' Mb';
+        return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' Gb';
+};
+    document.getElementById('total-files').innerHTML = `Всего файлов: ${files.length}<br>Общий объём: ${formatSize(totalSize)}`;
+}
+
+async function deleteFile(id) {
+    if (confirm('Удалить файл?')) {
+        await fetch(`/api/files/${id}/`, {
+            method: 'DELETE',
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+        loadFiles();
+    }
+}
+
+async function downloadFile(id) {
+    const res = await fetch(`/api/files/${id}/download/`, {
+        headers: {'Authorization': `Bearer ${token}`}
+    });
+    if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '';
+        a.click();
+        loadFiles();  
+    }
+}
+
+document.getElementById('file').addEventListener('change', function() {
+    const label = document.getElementById('file-label');
+    label.textContent = this.files[0] ? this.files[0].name : 'Выберите файл';
+});
+
+document.getElementById('upload-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = document.getElementById('file').files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('name_file', file.name);
+    formData.append('description', document.getElementById('description').value);
+    formData.append('is_public', document.getElementById('is_public').checked);
+    formData.append('size_file', file.size);
+    formData.append('content_type', file.type || 'application/octet-stream');
+
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    progressContainer.classList.remove('d-none');
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/files/');
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    
+    xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = percent + '%';
+        }
+    };
+    
+    xhr.onload = () => {
+        progressContainer.classList.add('d-none');
+        if (xhr.status === 201) {
+            document.getElementById('message').innerHTML = '<div class="alert alert-success">Файл загружен!</div>';
+            loadFiles();
+        } else {
+            console.log('Response:', xhr.responseText);
+            const error = JSON.parse(xhr.responseText);
+            const message = Array.isArray(error) ? error[0] : (error.detail || 'Ошибка загрузки');
+            document.getElementById('message').innerHTML = `<div class="alert alert-danger">${message}</div>`;
+        }
+    
+        setTimeout(() => {
+            document.getElementById('message').innerHTML = '';
+        }, 2000);
+    
+    // Сбросить форму
+        document.getElementById('upload-form').reset();
+        document.getElementById('file-label').textContent = 'Выберите файл';
+    };
+    
+    xhr.send(formData);
+});
+
+function copyLink(link) {
+    navigator.clipboard.writeText(link).then(() => {
+        alert('Ссылка скопирована: ' + link);
+    });
+}
+loadFiles();
+</script>
+{% endblock %}

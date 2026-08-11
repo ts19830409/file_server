@@ -10,13 +10,18 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "login",
             "email",
+            "password",
             "avatar",
             "created_at",
             "files_count",
             "total_size",
             "success_uploads",
             "failed_uploads",
+            "first_name",
+            "last_name",
         ]
+
+        extra_kwargs = {'password': {'write_only': True}}
 
         read_only_fields = [
             "created_at",
@@ -25,3 +30,10 @@ class UserSerializer(serializers.ModelSerializer):
             "success_uploads",
             "failed_uploads",
         ]
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user

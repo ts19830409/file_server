@@ -6,6 +6,7 @@ from files.models import File
 class FileSerializer(serializers.ModelSerializer):
     user_login = serializers.ReadOnlyField(source="user.login")
     file_url = serializers.SerializerMethodField()
+    format_size = serializers.SerializerMethodField()
 
     class Meta:
         model = File
@@ -17,6 +18,7 @@ class FileSerializer(serializers.ModelSerializer):
             "file_url",
             "name_file",
             "size_file",
+            "format_size",
             "content_type",
             "description",
             "is_public",
@@ -38,3 +40,6 @@ class FileSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.file.url)
             return obj.file.url
         return None
+
+    def get_format_size(self, obj):
+        return obj.format_size()

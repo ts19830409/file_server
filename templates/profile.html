@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-md-3 ms-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Статистика</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Всего файлов:</strong> <span id="stat-files">—</span></p>
+                <p><strong>Загружено всего:</strong> <span id="stat-total">—</span></p>
+                <p><strong>Успешных загрузок:</strong> <span id="stat-success">—</span></p>
+                <p><strong>Неудачных загрузок:</strong> <span id="stat-failed">—</span></p>
+                <p><strong>Удалено файлов:</strong> <span id="stat-deleted">—</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <h2 class="mb-3">Мой профиль</h2>
+        <div id="message" class="mt-2"></div>
+        
+        <form id="profile-form">
+            <div class="text-center mb-3">
+                <img id="avatar-preview" src="" class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover; display: none;">
+                <div>
+                    <label class="btn btn-outline-primary btn-sm" for="avatar">Выберите аватар</label>
+                    <input type="file" class="form-control d-none" id="avatar">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Логин</label>
+                <input type="text" class="form-control" id="login" disabled>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="email">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Имя</label>
+                <input type="text" class="form-control" id="first_name">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Фамилия</label>
+                <input type="text" class="form-control" id="last_name">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<script>
+const token = localStorage.getItem('access');
+if (!token) window.location.href = '/login/';
+
+async function loadProfile() {
+    const res = await fetch('/api/auth/user/', {
+        headers: {'Authorization': `Bearer ${token}`}
+    });
+    const user = await res.json();
+    
+    document.getElementById('login').value = user.login;
+    document.getElementById('email').value = user.email;
+    document.getElementById('first_name').value = user.first_name || '';
+    document.getElementById('last_name').value = user.last_name || '';
+    if (user.avatar) {
+        document.getElementById('avatar-preview').src = user.avatar;
+        document.getElementById('avatar-preview').style.display = 'block';
+        document.getElementById('header-avatar').src = user.avatar;
+    }
+    
+    // Статистика
+    document.getElementById('stat-files').textContent = user.files_count;
+    document.getElementById('stat-total').textContent = formatSize(user.total_size);
+    document.getElementById('stat-success').textContent = user.success_uploads;
+    document.getElementById('stat-failed').textContent = user.failed_uploads;
+    document.getElementById('stat-deleted').textContent = Math.max(0, user.success_uploads - user.files_count);
+}
+
+function formatSize(bytes) {
+    if (!bytes) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' Kb';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' Mb';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' Gb';
+}
+
+document.getElementById('avatar').addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('avatar-preview').src = e.target.result;
+            document.getElementById('avatar-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+document.getElementById('profile-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('email', document.getElementById('email').value);
+    formData.append('first_name', document.getElementById('first_name').value);
+    formData.append('last_name', document.getElementById('last_name').value);
+    const avatar = document.getElementById('avatar').files[0];
+    if (avatar) formData.append('avatar', avatar);
+
+    const res = await fetch('/api/auth/user/', {
+        method: 'PATCH',
+        headers: {'Authorization': `Bearer ${token}`},
+        body: formData
+    });
+    if (res.ok) {
+        document.getElementById('message').innerHTML = '<div class="alert alert-success">Профиль обновлён!</div>';
+        setTimeout(() => location.reload(), 1000);
+    }
+});
+
+loadProfile();
+</script>
+{% endblock %}

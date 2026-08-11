@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <h2 class="mb-4">Вход</h2>
+        <form id="login-form">
+            <div class="mb-3">
+                <label for="login" class="form-label">Логин</label>
+                <input type="text" class="form-control" id="login" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Пароль</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Войти</button>
+            <a href="/register/" class="btn btn-link">Регистрация</a>
+        </form>
+        <div id="error" class="text-danger mt-2"></div>
+    </div>
+</div>
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const res = await fetch('/api/auth/token/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            login: document.getElementById('login').value,
+            password: document.getElementById('password').value
+        })
+    });
+    if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('access', data.access);
+        localStorage.setItem('refresh', data.refresh);
+        window.location.href = '/files/';
+    } else {
+        document.getElementById('error').textContent = 'Неверный логин или пароль';
+    }
+});
+</script>
+{% endblock %}

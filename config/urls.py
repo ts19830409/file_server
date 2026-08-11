@@ -9,7 +9,12 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,  # noqa: E501
 
 from files.views import FileViewSet
 from stats.views import StatsListView
-from users.views import RegisterView, UserDetailView
+from users.views import RegisterView, UserDetailView, ContactView
+
+from django.views.generic import TemplateView
+from django.conf.urls.static import static
+from django.conf import settings
+from django.views.generic import RedirectView
 
 router = DefaultRouter()
 router.register(r"files", FileViewSet)
@@ -38,4 +43,23 @@ urlpatterns = [
     path("api/stats/", StatsListView.as_view(), name="stats-list"),
     path("swagger/", schema_view.with_ui("swagger"), name="swagger"),
     path("redoc/", schema_view.with_ui("redoc"), name="redoc"),
+
+    path('files/', include('files.urls')),
+    path('login/', TemplateView.as_view(template_name='login.html'), name='login-page'),
+    path('register/', TemplateView.as_view(template_name='register.html'), name='register-page'),
+
+    path('profile/', TemplateView.as_view(template_name='profile.html'), name='profile-page'),
+
+    path('about/', TemplateView.as_view(template_name='about.html'), name='about-page'),    
+    path('', RedirectView.as_view(url='/login/'), name='home'),
+
 ]
+
+urlpatterns += [
+    path('api/contact/', ContactView.as_view(), name='contact'),
+]
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

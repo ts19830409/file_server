@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <h2 class="mb-4">Регистрация</h2>
+        <form id="register-form">
+            <div class="mb-3">
+                <label for="login" class="form-label">Логин</label>
+                <input type="text" class="form-control" id="login" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Пароль</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            <a href="/login/" class="btn btn-link">Вход</a>
+        </form>
+        <div id="error" class="text-danger mt-2"></div>
+        <div id="success" class="text-success mt-2"></div>
+    </div>
+</div>
+<script>
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const res = await fetch('/api/auth/register/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            login: document.getElementById('login').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        })
+    });
+    if (res.ok) {
+        document.getElementById('success').textContent = 'Регистрация успешна! Перенаправление...';
+        setTimeout(() => window.location.href = '/login/', 1500);
+    } else {
+        const data = await res.json();
+        let errorMsg = '';
+        for (let field in data) {
+            errorMsg += data[field].join(', ');
+        }
+        document.getElementById('error').textContent = errorMsg;
+    }
+});
+</script>
+{% endblock %}
