@@ -5,7 +5,7 @@ services:
     image: postgres:15
     environment:
       POSTGRES_DB: ${NAME}
-      POSTGRES_USER: ${USER}
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
