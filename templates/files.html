@@ -51,17 +51,12 @@
 <div id="total-files" class="mt-4 text-muted"></div>
 
 <script>
-const token = localStorage.getItem('access');
-if (!token) window.location.href = '/login/';
-
 async function loadFiles() {
     
     let user = null;
     
     try {
-        const userRes = await fetch('/api/auth/user/', {
-            headers: {'Authorization': `Bearer ${token}`}
-        });
+        const userRes = await fetch('/api/auth/user/');
         user = await userRes.json();
         if (user.avatar) {
             document.getElementById('header-avatar').src = user.avatar;
@@ -82,12 +77,7 @@ async function loadFiles() {
         }
     }
 
-    
-
-
-    const res = await fetch('/api/files/', {
-        headers: {'Authorization': `Bearer ${token}`}
-    });
+    const res = await fetch('/api/files/');
     const data = await res.json();
     const tbody = document.getElementById('files-list');
     const files = Array.isArray(data) ? data : data.results;
@@ -110,10 +100,10 @@ async function loadFiles() {
     let totalSize = 0;
     files.forEach(f => totalSize += f.size_file || 0);
     const formatSize = (bytes) => {
-        if (bytes < 1024) return bytes + ' B';
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' Kb';
-        if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' Mb';
-        return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' Gb';
+        if (bytes < 1024) return bytes + ' Б';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' КБ';
+        if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' МБ';
+        return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' ГБ';
 };
     document.getElementById('total-files').innerHTML = `Всего файлов: ${files.length}<br>Общий объём: ${formatSize(totalSize)}`;
 }
@@ -121,17 +111,14 @@ async function loadFiles() {
 async function deleteFile(id) {
     if (confirm('Удалить файл?')) {
         await fetch(`/api/files/${id}/`, {
-            method: 'DELETE',
-            headers: {'Authorization': `Bearer ${token}`}
+            method: 'DELETE'
         });
         loadFiles();
     }
 }
 
 async function downloadFile(id) {
-    const res = await fetch(`/api/files/${id}/download/`, {
-        headers: {'Authorization': `Bearer ${token}`}
-    });
+    const res = await fetch(`/api/files/${id}/download/`);
     if (res.ok) {
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
@@ -165,7 +152,6 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/files/');
-    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     
     xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
