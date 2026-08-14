@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <h2>О проекте</h2>
+        <p><strong>File Server</strong> — Приложение для загрузки файлов на сервер.</p>
+        <p class="mb-1"><strong>Функциональность:</strong></p>
+        <ul>
+            <li>Регистрация и авторизация (JWT)</li>
+            <li>Загрузка файлов</li>
+            <li>Проверка дубликатов</li>
+            <li>Публичные ссылки для общего доступа</li>
+            <li>Отправка отчётов на email</li>
+            <li>Статистика загрузок</li>
+            <li>Профиль пользователя</li>
+        </ul>
+        <p class="mb-1"><strong>Тэги:</strong></p>
+        <ul>
+            <li>CORS</li>
+            <li>Git</li>
+            <li>ORM</li>
+            <li>OpenAPI Docs</li>
+            <li>PEP8</li>
+            <li>PostgreSQL</li>
+            <li>Readme</li>
+            <li>Serialiers</li>
+            <li>Test</li>
+            <li>Viewset/Generic</li>
+            <li>Docker</li>
+            <li>Docker-Compose</li>
+            <li>Права доступа</li>
+        </ul>
+        <p class="mb-1">Дипломный проект (TF2)</p>
+        <p class="mb-1">Автор: Цой Алексей</p>
+        <small>SkyPro 2026 год</small>
+    </div>
+    <div class="col-md-6">
+        <h2>Написать мне</h2>
+        <div id="message" class="mt-2"></div>
+        <form id="contact-form">
+            <div class="mb-3">
+                <label class="form-label">Ваш email</label>
+                <input type="email" class="form-control" id="contact-email" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Сообщение</label>
+                <textarea class="form-control" id="contact-message" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+    </div>
+</div>
+
+<script>
+async function checkAuth() {
+    try {
+        const res = await fetch('/api/auth/user/');
+        return res.ok;
+    } catch(e) {
+        return false;
+    }
+}
+
+async function setupNav() {
+    const isAuth = await checkAuth();
+    const nav = document.querySelector('nav .container');
+    if (nav && !isAuth) {
+        nav.innerHTML = `
+            <img src="/static/logo.png" alt="Logo" style="height: 70px; margin-right: 5px;">
+            <a class="navbar-brand fs-2 fw-bold" href="/files/">File Server</a>
+            <div>
+                <a class="btn btn-outline-light btn-sm" href="/login/">Назад</a>
+            </div>
+        `;
+    }
+}
+
+setupNav();
+
+document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const res = await fetch('/api/contact/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            email: document.getElementById('contact-email').value,
+            message: document.getElementById('contact-message').value
+        })
+    });
+    if (res.ok) {
+        document.getElementById('message').innerHTML = '<div class="alert alert-success">Сообщение отправлено!</div>';
+        document.getElementById('contact-form').reset();
+        setTimeout(() => document.getElementById('message').innerHTML = '', 2000);
+    } else {
+        document.getElementById('message').innerHTML = '<div class="alert alert-danger">Ошибка отправки</div>';
+    }
+});
+</script>
+{% endblock %}
