@@ -117,9 +117,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_ROOT = BASE_DIR / 'static'
+LOGIN_URL = '/login/'
 
-STATIC_URL = "static/"
+#STATIC_ROOT = BASE_DIR / 'static'
+
+STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 
 AUTH_USER_MODEL = "users.User"
@@ -130,6 +134,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -149,3 +154,4 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
+
