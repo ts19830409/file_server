@@ -9,6 +9,10 @@ from rest_framework.response import Response
 from django.core.mail import send_mail
 from django.conf import settings
 
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.shortcuts import redirect
+from django.shortcuts import redirect, render
+
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -36,3 +40,19 @@ class ContactView(APIView):
             fail_silently=False,
         )
         return Response({'ok': True})
+
+
+def login_view(request):
+    if request.method == 'POST':
+        login_name = request.POST.get('login')
+        password = request.POST.get('password')
+        user = authenticate(request, username=login_name, password=password)
+        if user is not None:
+            auth_login(request, user)
+            return redirect('/files/')
+    return render(request, 'login.html')
+
+
+def logout_view(request):
+    auth_logout(request)
+    return redirect('/login/')
