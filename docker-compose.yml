@@ -5,7 +5,7 @@ services:
     image: postgres:15
     environment:
       POSTGRES_DB: ${NAME}
-      POSTGRES_USER: ${USER}
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -33,28 +33,7 @@ services:
     env_file:
       - .env
 
-  celery:
-    build: .
-    command: celery -A config worker -l info
-    volumes:
-      - .:/app
-    depends_on:
-      - db
-      - redis
-    env_file:
-      - .env
-
-  celery-beat:
-    build: .
-    command: celery -A config beat -l info
-    volumes:
-      - .:/app
-    depends_on:
-      - db
-      - redis
-    env_file:
-      - .env
-
+  
   nginx:
     image: nginx:latest
     ports:
