@@ -44,18 +44,6 @@ class FileViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def perform_create(self, serializer):
-        name_file = serializer.validated_data.get('name_file')
-        size_file = serializer.validated_data.get('size_file')
-
-        existing = File.objects.filter(
-            user=self.request.user,
-            name_file=name_file,
-            size_file=size_file
-        ).first()
-
-        if existing:
-            raise ValidationError(f'Файл "{name_file}" уже существует!')
-
         file = serializer.save(user=self.request.user)
         user = self.request.user
 
