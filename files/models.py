@@ -42,4 +42,5 @@ class File(models.Model):
         verbose_name = "Файл"
         verbose_name_plural = "Файлы"
         ordering = ["-uploaded_at"]
+        unique_together = ["user", "name_file", "size_file"]
 

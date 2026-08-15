@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="row">
     <div class="col-md-6">
@@ -29,12 +30,10 @@
             <li>Docker</li>
             <li>Docker-Compose</li>
             <li>Права доступа</li>
-
         </ul>
         <p class="mb-1">Дипломный проект (TF2)</p>
         <p class="mb-1">Автор: Цой Алексей</p>
         <small>SkyPro 2026 год</small>
-    
     </div>
     <div class="col-md-6">
         <h2>Написать мне</h2>
@@ -54,6 +53,31 @@
 </div>
 
 <script>
+async function checkAuth() {
+    try {
+        const res = await fetch('/api/auth/user/');
+        return res.ok;
+    } catch(e) {
+        return false;
+    }
+}
+
+async function setupNav() {
+    const isAuth = await checkAuth();
+    const nav = document.querySelector('nav .container');
+    if (nav && !isAuth) {
+        nav.innerHTML = `
+            <img src="/static/logo.png" alt="Logo" style="height: 70px; margin-right: 5px;">
+            <a class="navbar-brand fs-2 fw-bold" href="/files/">File Server</a>
+            <div>
+                <a class="btn btn-outline-light btn-sm" href="/login/">Назад</a>
+            </div>
+        `;
+    }
+}
+
+setupNav();
+
 document.getElementById('contact-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const res = await fetch('/api/contact/', {

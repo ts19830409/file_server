@@ -33,6 +33,19 @@ class FileSerializer(serializers.ModelSerializer):
             "file_url",
         ]
 
+    def validate(self, data):
+        user = self.context["request"].user
+        name_file = data.get("name_file")
+        size_file = data.get("size_file")
+
+        if File.objects.filter(
+            user=user, name_file=name_file, size_file=size_file
+        ).exists():
+            raise serializers.ValidationError(
+                f'Файл "{name_file}" уже существует!'
+            )
+        return data
+
     def get_file_url(self, obj):
         request = self.context.get("request")
         if obj.file:
