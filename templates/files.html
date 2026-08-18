@@ -110,7 +110,7 @@ async function loadFiles() {
             <td>
                 <a href="#" onclick="downloadFile(${f.id})" class="btn btn-sm btn-outline-primary">Скачать</a>
                 <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(${f.id})">Удалить</button>
-                ${f.is_public ? `<button class="btn btn-sm btn-outline-success" onclick="copyLink('${f.share_link}')">Ссылка</button>` : ''}
+                ${f.is_public ? `<button class="btn btn-sm btn-outline-success" onclick="copyLink(${f.id})">Ссылка</button>` : ''}
             </td>
         </tr>
     `).join('');
@@ -204,9 +204,12 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
     xhr.send(formData);
 });
 
-function copyLink(link) {
+function copyLink(id) {
+    const link = `${window.location.origin}/api/files/${id}/download/`;
     navigator.clipboard.writeText(link).then(() => {
         alert('Ссылка скопирована: ' + link);
+    }).catch(err => {
+        alert('Не удалось скопировать ссылку: ' + link);
     });
 }
 loadFiles();
