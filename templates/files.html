@@ -51,6 +51,24 @@
 <div id="total-files" class="mt-4 text-muted"></div>
 
 <script>
+
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
 async function loadFiles() {
     
     let user = null;
@@ -152,6 +170,7 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/files/');
+    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
     
     xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
