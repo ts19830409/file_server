@@ -43,6 +43,7 @@ class ContactView(APIView):
 
 
 def login_view(request):
+    error = None
     if request.method == 'POST':
         login_name = request.POST.get('login')
         password = request.POST.get('password')
@@ -50,8 +51,9 @@ def login_view(request):
         if user is not None:
             auth_login(request, user)
             return redirect('/files/')
-    return render(request, 'login.html')
-
+        else:
+            error = 'Неверный логин или пароль'
+    return render(request, 'login.html', {'error': error})
 
 def logout_view(request):
     auth_logout(request)
