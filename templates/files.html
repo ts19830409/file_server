@@ -108,7 +108,7 @@ async function loadFiles() {
             <td>${f.download_count}</td>
             <td>${new Date(f.uploaded_at).toLocaleDateString('ru-RU')}</td>
             <td>
-                <a href="/api/files/${f.id}/download/" class="btn btn-sm btn-outline-primary">Скачать</a>
+                <a href="${f.file_url}" class="btn btn-sm btn-outline-primary" download>Скачать</a>
                 <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(${f.id})">Удалить</button>
                 ${f.is_public ? `<button class="btn btn-sm btn-outline-success" onclick="copyLink(${f.id})">Ссылка</button>` : ''}
             </td>
