@@ -129,7 +129,10 @@ async function loadFiles() {
 async function deleteFile(id) {
     if (confirm('Удалить файл?')) {
         await fetch(`/api/files/${id}/`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
         });
         loadFiles();
     }
@@ -194,12 +197,28 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
 
 function copyLink(id) {
     const link = `${window.location.origin}/api/files/${id}/download/`;
-    navigator.clipboard.writeText(link).then(() => {
-        alert('Ссылка скопирована: ' + link);
-    }).catch(err => {
-        alert('Не удалось скопировать ссылку: ' + link);
-    });
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(link).then(() => {
+            alert('Ссылка скопирована: ' + link);
+        }).catch(() => {
+            fallbackCopy(link);
+        });
+    } else {
+        fallbackCopy(link);
+    }
 }
+
+function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    alert('Ссылка скопирована: ' + text);
+}
+
 loadFiles();
 </script>
 {% endblock %}
