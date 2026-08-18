@@ -50,6 +50,22 @@
 </div>
 
 <script>
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 async function loadProfile() {
     const res = await fetch('/api/auth/user/');
     const user = await res.json();
@@ -101,9 +117,12 @@ document.getElementById('profile-form').addEventListener('submit', async (e) => 
     if (avatar) formData.append('avatar', avatar);
 
     const res = await fetch('/api/auth/user/', {
-        method: 'PATCH',
-        body: formData
-    });
+    method: 'PATCH',
+    headers: {
+        'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: formData
+});
     if (res.ok) {
         document.getElementById('message').innerHTML = '<div class="alert alert-success">Профиль обновлён!</div>';
         setTimeout(() => location.reload(), 1000);
