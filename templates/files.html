@@ -108,7 +108,7 @@ async function loadFiles() {
             <td>${f.download_count}</td>
             <td>${new Date(f.uploaded_at).toLocaleDateString('ru-RU')}</td>
             <td>
-                <a href="#" onclick="downloadFile(${f.id})" class="btn btn-sm btn-outline-primary">Скачать</a>
+                <a href="/api/files/${f.id}/download/" class="btn btn-sm btn-outline-primary">Скачать</a>
                 <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(${f.id})">Удалить</button>
                 ${f.is_public ? `<button class="btn btn-sm btn-outline-success" onclick="copyLink(${f.id})">Ссылка</button>` : ''}
             </td>
@@ -135,18 +135,6 @@ async function deleteFile(id) {
     }
 }
 
-async function downloadFile(id) {
-    const res = await fetch(`/api/files/${id}/download/`);
-    if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = '';
-        a.click();
-        loadFiles();  
-    }
-}
 
 document.getElementById('file').addEventListener('change', function() {
     const label = document.getElementById('file-label');
